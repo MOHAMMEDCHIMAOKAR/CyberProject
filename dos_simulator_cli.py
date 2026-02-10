@@ -8,9 +8,8 @@ import argparse
 import threading
 import time
 from datetime import datetime
-# import core send/conf from scapy and explicit protocol layers to satisfy static analyzers
-from scapy.all import send, conf
-from scapy.layers.inet import IP, TCP, UDP
+# import core send/conf from scapy and explicit protocol layers to satisfy static
+# analyzers
 from scapy.all import send, conf
 from scapy.layers.inet import IP, TCP, UDP
 from config import Config

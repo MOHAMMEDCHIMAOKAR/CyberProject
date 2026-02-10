@@ -11,7 +11,27 @@ import time
 from datetime import datetime
 import random
 import socket
-from scapy.all import IP, TCP, UDP, send, conf
+try:
+    # Import specific scapy modules (more explicit for some IDEs)
+    from scapy.layers.inet import IP, TCP, UDP
+    from scapy.sendrecv import send
+    from scapy.config import conf
+except Exception:
+    # Provide lightweight stubs so static analysis or missing scapy doesn't break editing;
+    # runtime will raise if actual scapy functionality is required but not installed.
+    class IP:
+        def __init__(self, *args, **kwargs): pass
+        def __truediv__(self, other): return self
+    class TCP:
+        def __init__(self, *args, **kwargs): pass
+    class UDP:
+        def __init__(self, *args, **kwargs): pass
+    def send(*args, **kwargs):
+        raise RuntimeError("scapy.send not available (install scapy to enable packet sending)")
+    class _Conf:
+        verb = 0
+    conf = _Conf()
+
 from config import Config
 
 class DoSSimulator:
