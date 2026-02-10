@@ -19,6 +19,7 @@ class GUIDetector:
         self.running = False
         self.monitor_thread = None
         self.target_ip = None
+        self.lock = threading.Lock()
         
         # Override alert system to capture alerts
         self._setup_alert_capture()
