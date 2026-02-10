@@ -84,6 +84,87 @@ python gui_main.py
 python dos_detector.py
 ```
 
+## 🧪 Testing & Simulation
+
+**Generate synthetic DoS traffic to validate detection system**
+
+### GUI Simulator (Interactive)
+
+Start the interactive simulator dashboard:
+
+```bash
+python dos_simulator.py
+```
+
+**Features**:
+- Easy-to-use interface for generating test traffic
+- Multiple attack types to choose from
+- Adjustable intensity and duration
+- Real-time progress monitoring
+- Perfect for demonstration and validation
+
+**How to use**:
+1. Start the simulator with `python dos_simulator.py`
+2. Enter target IP address (use `127.0.0.1` for loopback testing)
+3. Select attack type (High Request Rate, Connection Flood, SYN Flood, or Packet Size)
+4. Set duration and intensity
+5. Click "Start Simulation" to begin generating test traffic
+6. Monitor detection in the DoS Detection System GUI simultaneously
+
+### Command-Line Simulator (Quick Testing)
+
+For automated testing scripts:
+
+```bash
+# SYN Flood test (20 seconds, 1.5x threshold)
+python dos_simulator_cli.py --type syn_flood --target 127.0.0.1 --duration 20 --intensity 1.5
+
+# High Request Rate test
+python dos_simulator_cli.py --type high_request_rate --target 127.0.0.1 --duration 10 --intensity 2.0
+
+# Connection Flood test
+python dos_simulator_cli.py --type connection_flood --target 192.168.1.1 --duration 15
+
+# Packet Size Attack test
+python dos_simulator_cli.py --type packet_size --target 10.0.0.1 --intensity 1.2
+```
+
+**Available options**:
+- `--type`: Attack type (syn_flood, high_request_rate, connection_flood, packet_size)
+- `--target`: Target IP address (required)
+- `--duration`: Duration in seconds (default: 10, max: 300)
+- `--intensity`: Intensity multiplier (default: 1.5, range: 0.1-10.0)
+
+### Testing Workflow
+
+1. **Open two terminals**:
+   - Terminal 1: Run detector `python gui_main.py`
+   - Terminal 2: Run simulator
+
+2. **Start the detector**:
+   - Launch detector GUI
+   - Click "Start Monitoring"
+   - Wait for connection establishment
+
+3. **Run simulation**:
+   - In simulator, select test parameters
+   - Click "Start" to begin traffic generation
+   - Watch real-time detection in detector GUI
+
+4. **Verify detection**:
+   - Check for alerts appearing in Alerts panel
+   - Review statistics updating
+   - Check System Logs for detection messages
+
+### Testing Best Practices
+
+- **Use localhost (127.0.0.1) for initial testing**: No network impact
+- **Start with low intensity**: Increase gradually
+- **Run both tools with administrator privileges**
+- **Monitor resource usage**: High intensity may consume CPU
+- **Test each attack type individually**: Isolates detection effectiveness
+- **Review logs after each test**: Analyze detection accuracy
+
 ## ⚙️ Configuration
 
 Edit [config.py](config.py) to adjust detection parameters:
@@ -123,16 +204,18 @@ Config.remove_whitelist_ip("192.168.1.100")
 
 ```
 CyberProject-1/
-├── gui_main.py           # Main GUI application entry point
-├── gui_detector.py       # GUI-integrated detection engine
-├── gui_components.py     # Reusable GUI components (StatCard, AlertItem, etc.)
-├── dos_detector.py       # Core DoS detection engine
-├── packet_monitor.py     # Network packet capture and analysis
-├── alert_system.py       # Alert generation and management
-├── config.py             # Central configuration
-├── requirements.txt      # Python dependencies
-├── dos_alerts.log        # Alert log file (generated)
-└── README.md             # This file
+├── gui_main.py             # Main GUI application entry point
+├── gui_detector.py         # GUI-integrated detection engine
+├── gui_components.py       # Reusable GUI components (StatCard, AlertItem, etc.)
+├── dos_detector.py         # Core DoS detection engine
+├── packet_monitor.py       # Network packet capture and analysis
+├── alert_system.py         # Alert generation and management
+├── config.py               # Central configuration
+├── dos_simulator.py        # GUI-based DoS traffic simulator (testing)
+├── dos_simulator_cli.py    # Command-line DoS traffic simulator (testing)
+├── requirements.txt        # Python dependencies
+├── dos_alerts.log          # Alert log file (generated)
+└── README.md               # This file
 ```
 
 ## 🔍 Alert Severity Levels
@@ -222,9 +305,12 @@ All events are logged to `dos_alerts.log`:
 
 - **Enterprise Networks**: Detect and respond to DoS attacks in real-time
 - **Security Operations Centers (SOC)**: Monitor multiple network segments
-- **Development/Testing**: Validate DoS protection mechanisms
+- **Development/Testing**: Validate DoS protection mechanisms using built-in simulators
 - **Network Administration**: Identify problematic clients consuming bandwidth
 - **Security Research**: Analyze attack patterns and behaviors
+- **Security Training**: Hands-on lab exercises with realistic attack simulation
+- **Detection Tuning**: Test and refine thresholds using CLI simulator in scripts
+- **Proof of Concept (PoC)**: Demonstrate detection capabilities to stakeholders
 
 ## 📄 License
 
