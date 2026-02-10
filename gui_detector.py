@@ -18,6 +18,7 @@ class GUIDetector:
         self.log_queue = queue.Queue()
         self.running = False
         self.monitor_thread = None
+        self.target_ip = None
         
         # Override alert system to capture alerts
         self._setup_alert_capture()
@@ -42,13 +43,14 @@ class GUIDetector:
             
         self.detector.alert_system.send_alert = gui_send_alert
         
-    def start_detection(self, interface=None):
-        """Start detection in background thread"""
+    def start_detection(self, interface=None, target_ip=None):
+        """Start packet sniffing with optional target IP filtering"""
+        self.target_ip = target_ip
         if self.running:
             return False
             
         self.running = True
-        self.log_queue.put(("INFO", f"Starting DoS detection on interface: {interface or 'all'}"))
+        self.log_queue.put(("INFO", f"Starting DoS detection on interface: {interface or 'all'} with target IP: {target_ip}"))
         
         self.monitor_thread = threading.Thread(
             target=self._run_detection,
@@ -61,7 +63,7 @@ class GUIDetector:
     def _run_detection(self, interface):
         """Run detection (called in thread)"""
         try:
-            self.detector.start_detection(interface)
+            self.detector.start_detection(interface, self.target_ip)
         except Exception as e:
             self.log_queue.put(("ERROR", f"Detection error: {e}"))
             self.running = False
@@ -120,3 +122,24 @@ class GUIDetector:
         if syn_threshold is not None:
             Config.SYN_FLOOD_THRESHOLD = syn_threshold
             self.log_queue.put(("INFO", f"Updated SYN threshold: {syn_threshold}"))
+            
+    def _packet_callback(self, packet):
+        """Packet processing callback with target IP filtering"""
+        try:
+            from scapy.layers.inet import IP, TCP, UDP
+            
+            # Skip non-IP packets
+            if IP not in packet:
+                return
+                
+            src_ip = packet[IP].src
+            dst_ip = packet[IP].dst
+            
+            # Filter by target IP if specified
+            if self.target_ip:
+                if src_ip != self.target_ip and dst_ip != self.target_ip:
+                    return
+            
+            # ...existing code for packet analysis...
+        except Exception as e:
+            self._add_log(f"Error processing packet: {e}", "ERROR")

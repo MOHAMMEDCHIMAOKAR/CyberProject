@@ -156,6 +156,22 @@ class DoSDetectionGUI:
         self.interface_combo['values'] = self._get_interfaces()
         self.interface_combo.pack(side=tk.LEFT, fill=tk.X, expand=True)
         
+        # Target IP scanning option
+        target_frame = ttk.Frame(panel)
+        target_frame.pack(fill=tk.X, pady=(0, 10))
+        
+        ttk.Label(target_frame, text="Target IP (optional):").pack(side=tk.LEFT, padx=(0, 10))
+        
+        self.target_ip_var = tk.StringVar(value="")
+        self.target_ip_entry = ttk.Entry(
+            target_frame,
+            textvariable=self.target_ip_var,
+            width=30
+        )
+        self.target_ip_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
+        
+        ttk.Label(target_frame, text="(Leave empty to monitor all IPs)", foreground='#999').pack(side=tk.LEFT)
+        
         # Control buttons
         button_frame = ttk.Frame(panel)
         button_frame.pack(fill=tk.X)
@@ -291,21 +307,47 @@ class DoSDetectionGUI:
         except:
             return ["All Interfaces"]
             
+    def _validate_ip(self, ip_address):
+        """Validate IP address format"""
+        try:
+            parts = ip_address.split('.')
+            if len(parts) != 4:
+                return False
+            for part in parts:
+                num = int(part)
+                if num < 0 or num > 255:
+                    return False
+            return True
+        except ValueError:
+            return False
+            
     def _start_monitoring(self):
         """Start DoS detection"""
         interface = None if self.interface_var.get() == "All Interfaces" else self.interface_var.get()
+        target_ip = self.target_ip_var.get().strip() if self.target_ip_var.get() else None
         
-        if self.detector.start_detection(interface):
+        # Validate target IP if provided
+        if target_ip:
+            if not self._validate_ip(target_ip):
+                messagebox.showerror("Error", f"Invalid IP address format: {target_ip}")
+                return
+        
+        if self.detector.start_detection(interface, target_ip):
             self.running = True
             self.start_button.config(state=tk.DISABLED)
             self.stop_button.config(state=tk.NORMAL)
             self.interface_combo.config(state=tk.DISABLED)
+            self.target_ip_entry.config(state=tk.DISABLED)
             
             self.status_indicator.set_status('running')
             self.status_label.config(text="Running", foreground='#4CAF50')
-            self.status_text.config(text=f"Monitoring started on {self.interface_var.get()}")
             
-            self.log_viewer.add_log(f"Monitoring started on {self.interface_var.get()}", "SUCCESS")
+            status_msg = f"Monitoring started on {self.interface_var.get()}"
+            if target_ip:
+                status_msg += f" | Target IP: {target_ip}"
+            self.status_text.config(text=status_msg)
+            
+            self.log_viewer.add_log(status_msg, "SUCCESS")
         else:
             messagebox.showerror("Error", "Failed to start monitoring. Run as Administrator.")
             
@@ -316,6 +358,7 @@ class DoSDetectionGUI:
             self.start_button.config(state=tk.NORMAL)
             self.stop_button.config(state=tk.DISABLED)
             self.interface_combo.config(state='readonly')
+            self.target_ip_entry.config(state=tk.NORMAL)
             
             self.status_indicator.set_status('stopped')
             self.status_label.config(text="Stopped", foreground='#999')

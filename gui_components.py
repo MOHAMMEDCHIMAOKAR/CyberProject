@@ -182,7 +182,7 @@ class ConfigSlider(ttk.Frame):
         """Handle slider change"""
         int_value = int(float(value))
         self.value_label.config(text=str(int_value))
-        if self.custom_command:
+        if hasattr(self, 'custom_command') and self.custom_command:
             self.custom_command(int_value)
             
     def get(self):

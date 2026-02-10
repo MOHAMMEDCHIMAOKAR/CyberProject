@@ -11,6 +11,8 @@ import time
 from datetime import datetime
 import random
 import socket
+from unittest.mock import patch, MagicMock
+
 try:
     # Import specific scapy modules (more explicit for some IDEs)
     from scapy.layers.inet import IP, TCP, UDP
@@ -43,6 +45,8 @@ class DoSSimulator:
         self.attack_type = None
         self.intensity = 1.0
         self.thread = None
+        self.packets_sent = 0
+        self.attack_start_time = None
         
     def simulate_high_request_rate(self, target_ip, duration=10, intensity=1.0):
         """Simulate high request rate attack"""
