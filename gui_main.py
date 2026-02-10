@@ -5,7 +5,6 @@ Main application window with dashboard and controls
 
 import tkinter as tk
 from tkinter import ttk, messagebox
-import threading
 from datetime import datetime
 from gui_components import StatCard, AlertItem, LogViewer, StatusIndicator, ConfigSlider
 from gui_detector import GUIDetector
